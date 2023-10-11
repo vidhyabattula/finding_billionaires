@@ -1,0 +1,98 @@
+---
+title: "How To Make A Billion"
+output: github_document
+---
+
+Data Source Link: 
+
+https://www.kaggle.com/datasets/nelgiriyewithana/billionaires-statistics-dataset
+
+# Data Prep Tasks:
+
+```{r}
+data <- read.csv("data/Billionaires Statistics Dataset.csv") 
+str(data)   
+```
+
+
+```{r}
+data$gdp_country <- gsub(pattern = ",|\\$|\\s",
+                         replacement ="",
+                         data$gdp_country)
+
+data$gdp_country <- as.numeric(data$gdp_country)
+```
+
+Used 'gsub' to remove commas in my GDP country column, then changed it to numeric just so if I can make any calculations in future.
+
+```{r}
+library(stringr)
+
+data$gender <- str_extract(data$gender, "[FM]")
+```
+
+
+```{r}
+library(lubridate)
+data$DOB <- as.Date(data$birthYear,data$birthMonth,data$birthDay)
+str(data)
+```
+
+Loaded lubridate because this package also helps in doing a lot of manipulations with Dates. Then added a column called DOB while changing its class by date.
+
+# Data Analytical Tasks
+
+a. Which industries are most common among billionaires?
+   
+```{r}
+library(ggplot2)
+
+viz_1 <- ggplot(data, aes(x = finalWorth, y = category)) +
+  geom_point(color = "black") +
+labs(title = "Which industries are most common among billionaires?") +
+  theme_minimal() 
+```
+
+Created a scatter plot to check "Which industries are most common among billionaires."
+
+
+b. How has the source of wealth evolved over time?
+   
+```{r}
+
+viz_2 <- ggplot(data, aes(x = birthYear, y = finalWorth))+
+  geom_line(color = "black") +
+    labs(title = "How has the source of wealth evolved over time?") +
+  theme_minimal()
+
+viz_1
+viz_2
+library(patchwork)
+viz_1 + viz_2
+viz_1 / viz_2
+```
+   
+Same here, I wanted to know the relation between time and wealth. So, I created a line graph.
+
+New thing here is I used patchwork to combine the above two plots. First I wanted to do side by side then I saw the information is congested and not looking nice so I made up and down by using viz 1/viz 2 syntax.
+   
+c. Are there any specific trends in the sources of wealth for self-made billionaires?
+   
+```{r}
+library(ggdark)
+ggplot(data,
+       aes(x = status, y = finalWorth)) +
+  geom_boxplot() +
+  scale_color_brewer(type = "qual", palette = "Set2") +
+    labs(title = "D: Entrepreneur, U: Inherited, N: Investment, E: Real Estate, R: Others") +
+  dark_theme_minimal() 
+```
+
+New thing here😄 
+
+I used ggdark here to get dark themed plots. Created a box and whisker plots to summarise and see the distribution of the data. Then I reverted into the geom defaults because when ggdark is used the defaults are changed.So, we always should definitely change it to default after using ggdark.
+
+```{r}
+invert_geom_defaults()
+```
+
